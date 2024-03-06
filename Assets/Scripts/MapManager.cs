@@ -12,6 +12,7 @@ public class MapManager : MonoBehaviour
     public GameObject overlayContainer;
 
     public Dictionary<Vector2Int, OverlayTile> map;
+    public MouseController mouseController;
 
     private void Awake()
     {
@@ -48,10 +49,81 @@ public class MapManager : MonoBehaviour
                     var cellLocation = tileMap.GetCellCenterWorld(tileLocation);
                     overlayTile.transform.localPosition = cellLocation;
                     overlayTile.gridLocation = gridLocation;
-
+                    mouseController.AddObserver(overlayTile);
+                    overlayTile._tileSubject = mouseController;
                     map.Add(gridLocation, overlayTile);
                 }
             }
         }
+    }
+
+    public List<OverlayTile> GetNeighbourTiles(OverlayTile currentOverlayTile, List<OverlayTile> searchableTiles)
+    {
+        Dictionary<Vector2Int, OverlayTile> tileToSearch = new Dictionary<Vector2Int, OverlayTile>();
+
+        if (searchableTiles.Count > 0)
+        {
+            foreach (var item in searchableTiles)
+            {
+                tileToSearch.Add(item.gridLocation, item);
+            }
+        }
+        else
+        {
+            tileToSearch = map;
+        }
+
+        List<OverlayTile> neighbours = new List<OverlayTile>();
+        if (currentOverlayTile != null)
+        {
+            foreach (var direction in GetDirections())
+            {
+                Vector2Int locationToCheck = currentOverlayTile.gridLocation + direction;
+                ValidateNeighbour(tileToSearch, neighbours, locationToCheck);
+            }
+        }
+
+        return neighbours;
+    }
+
+    //Check the neighbouring tile is valid.
+    private static void ValidateNeighbour(Dictionary<Vector2Int, OverlayTile> tilesToSearch, List<OverlayTile> neighbours, Vector2Int locationToCheck)
+    {
+        bool canAccessLocation = false;
+
+        if (tilesToSearch.ContainsKey(locationToCheck))
+        {
+            OverlayTile tile = tilesToSearch[locationToCheck];
+            bool isBlocked = tile.IsOccupied;
+
+            if (!isBlocked)
+            {
+                canAccessLocation = true;
+            }
+
+            if (canAccessLocation)
+            {
+                //artificial jump height. 
+                    neighbours.Add(tilesToSearch[locationToCheck]);
+            }
+        }
+    }
+
+    public OverlayTile GetClosestUnoccupiedTile(Vector3 position)
+    {
+        var gridPosition = tileMap.WorldToCell(position);
+        return map[new Vector2Int(gridPosition.x, gridPosition.y)];
+    }
+
+    private IEnumerable<Vector2Int> GetDirections()
+    {
+        yield return Vector2Int.up;
+        yield return Vector2Int.down;
+        yield return Vector2Int.right;
+        yield return Vector2Int.left;
+        yield return new Vector2Int(1, 1);
+        yield return new Vector2Int(-1, 1);
+        yield return new Vector2Int(1, -1);
+        yield return new Vector2Int(-1, -1);
     }
 }

@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class MouseController : MonoBehaviour
+public class MouseController : Subject
 {
     public OverlayTile focusedOnTile;
+
 
     // Update is called once per frame
     void FixedUpdate()
@@ -15,20 +16,19 @@ public class MouseController : MonoBehaviour
 
         if(newFocusedOnTile)
         {
-            if(focusedOnTile != newFocusedOnTile)
+            if(focusedOnTile != newFocusedOnTile && !newFocusedOnTile.IsOccupied)
             {
                 focusedOnTile = newFocusedOnTile;
                 transform.position = newFocusedOnTile.transform.position;
             }
         }
-
-        
     }
 
     private void Update()
     {
         if (Input.GetMouseButton(0))
         {
+            NotifyObservers();
             focusedOnTile.Show();
         }
     }
