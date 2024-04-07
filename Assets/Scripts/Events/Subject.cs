@@ -21,4 +21,9 @@ public abstract class Subject : MonoBehaviour
     {
         _observers.ForEach(observer => observer.OnNotify());
     }
+
+    public void NotifyObservers(ResourceValue resource)
+    {
+        _observers.ForEach(observer => observer.OnNotify(resource));
+    }
 }

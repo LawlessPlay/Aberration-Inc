@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -111,8 +112,12 @@ public class MapManager : MonoBehaviour
 
     public OverlayTile GetClosestUnoccupiedTile(Vector3 position)
     {
-        var gridPosition = tileMap.WorldToCell(position);
-        return map[new Vector2Int(gridPosition.x, gridPosition.y)];
+        if (map != null) {
+            var gridPosition = tileMap.WorldToCell(position);
+            return map[new Vector2Int(gridPosition.x, gridPosition.y)];
+        }
+
+        return null;
     }
 
     private IEnumerable<Vector2Int> GetDirections()
@@ -125,5 +130,31 @@ public class MapManager : MonoBehaviour
         yield return new Vector2Int(-1, 1);
         yield return new Vector2Int(1, -1);
         yield return new Vector2Int(-1, -1);
+    }
+
+    public OverlayTile GetRandomUnoccupiedTile()
+    {
+        if (map != null && map.Count > 0)
+        {
+            // Filter unoccupied tiles
+            var unoccupiedTiles = map.Values.Where(tile => !tile.IsOccupied).ToList();
+
+            if (unoccupiedTiles.Count > 0)
+            {
+                // Get a random unoccupied tile
+                int randomIndex = UnityEngine.Random.Range(0, unoccupiedTiles.Count);
+                return unoccupiedTiles[randomIndex];
+            }
+            else
+            {
+                Debug.LogWarning("No unoccupied tiles available.");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("Map or map data is null.");
+        }
+
+        return null;
     }
 }

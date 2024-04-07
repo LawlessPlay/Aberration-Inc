@@ -45,4 +45,14 @@ public class OverlayTile : MonoBehaviour, IObserver
     {
         node.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0);
     }
+
+    public void OnNotify(ResourceValue resource)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void OnNotify(Job job)
+    {
+        throw new System.NotImplementedException();
+    }
 }
